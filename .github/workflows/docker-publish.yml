@@ -1,0 +1,33 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+      - init
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  ORGA_NAME : ${{ github.repository_owner }}
+  PAT :  ${{ secrets.PAT }}
+  USER :  ${{ secrets.USER }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ PAT }}" | docker login ${{REGISTRY}} -u ${{ USER }} --password-stdin
+
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{REGISTRY}}/${{ORGA_NAME}}/${{IMAGE_NAME}}latest .
+
+    - name: Push Docker Image
+      run: |
+        docker push ${{REGISTRY}}/${{ORGA_NAME}}/${{IMAGE_NAME}}:latest
