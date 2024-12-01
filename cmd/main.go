@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/Bibliotheque-microservice/emprunts/database"
 	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitMQ"
 	"github.com/Bibliotheque-microservice/emprunts/structures"
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
+	database.ConnectDb()
 
 	rabbitmq.InitRabbitMQ()
 	defer rabbitmq.CloseRabbitMQ()
