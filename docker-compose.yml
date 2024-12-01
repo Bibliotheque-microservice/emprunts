@@ -28,12 +28,13 @@ services:
   db:
     image: postgres:alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: bibliotheque
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
+      - ./migrations/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres-db:/var/lib/postgresql/data
 
   adminer:
