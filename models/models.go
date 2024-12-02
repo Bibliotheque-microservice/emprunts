@@ -19,12 +19,10 @@ type Emprunt struct {
 }
 
 type Penalite struct {
-	IDPenalite    uint      `gorm:"primaryKey;column:id_penalite"`
-	UtilisateurID uint      `gorm:"not null"`
-	EmpruntID     uint      `gorm:"not null;column:emprunt_id;constraint:OnDelete:CASCADE"`
-	Montant       float64   `gorm:"not null"`
-	Paye          bool      `gorm:"default:false"`
-	DateCalcul    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	IDPenalite    uint    `gorm:"primaryKey;column:id_penalite"`
+	UtilisateurID uint    `gorm:"not null"`
+	EmpruntID     uint    `gorm:"not null;column:emprunt_id;constraint:OnDelete:CASCADE"`
+	Montant       float64 `gorm:"not null"`
 	DatePaiement  *time.Time
 	Emprunt       Emprunt `gorm:"foreignKey:EmpruntID;references:IDEmprunt"`
 	CreatedAt     time.Time
