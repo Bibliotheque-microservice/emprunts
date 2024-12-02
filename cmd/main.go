@@ -10,6 +10,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func setupRoutes(app *fiber.App) {
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Bienvenue sur l'API Emprunts !")
+	})
+
+	// Ajoutez d'autres routes ici si nécessaire
+}
+
 func main() {
 	database.ConnectDb()
 
@@ -22,8 +30,6 @@ func main() {
 		for msg := range penality_msgs {
 			switch msg.RoutingKey {
 			case "user.v1.penalities.new":
-
-				// Parsing JSON and assign to jsonData
 				var jsonData structures.PenaltyMessage
 				err := json.Unmarshal(msg.Body, &jsonData)
 				if err != nil {
@@ -39,7 +45,6 @@ func main() {
 				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
 				log.Printf("Contenu brut du message : %s", string(msg.Body))
 			}
-
 		}
 	}()
 
@@ -51,25 +56,19 @@ func main() {
 			case "emprunts.v1.finished":
 				var jsonData interface{}
 				err := json.Unmarshal(msg.Body, &jsonData)
-
 				if err != nil {
 					log.Printf("Erreur de parsing JSON : %v", err)
 					continue
 				}
-
-				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
-				log.Printf("Contenu brut du message : %s", jsonData)
-
+				log.Printf("Message JSON reçu : %+v", jsonData)
 			default:
 				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
 				log.Printf("Contenu brut du message : %s", string(msg.Body))
 			}
-
 		}
 	}()
+
 	app := fiber.New()
-
 	setupRoutes(app)
-
-	app.Listen(":5000")
+	log.Fatal(app.Listen(":5000"))
 }
