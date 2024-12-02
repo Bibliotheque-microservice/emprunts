@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -67,15 +68,19 @@ func InitRabbitMQ() {
 }
 
 // PublishMessage publishes a message to a specific routing key
-func PublishMessage(exchangeName, routingKey, message string) {
-	err := ch.Publish(
-		exchangeName, // nom exchange
-		routingKey,   // routing key utile pour consume que cette route
+func PublishMessage(exchangeName string, routingKey string, message interface{}) {
+
+	messageJSON, err := json.Marshal(message)
+	myutils.FailOnError(err, "Failed to marshal message to JSON")
+
+	err = ch.Publish(
+		exchangeName,
+		routingKey, // routing key utile pour consume que cette route
 		false,
 		false, // immediate
 		amqp091.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
+			ContentType: "application/json",
+			Body:        messageJSON,
 		})
 	myutils.FailOnError(err, "Failed to publish a message")
 	log.Printf("Published message to %s: %s", routingKey, message)
@@ -83,7 +88,10 @@ func PublishMessage(exchangeName, routingKey, message string) {
 
 // ConsumeMessages starts consuming messages from a specific queue
 func ConsumeMessages(queueName string) <-chan amqp091.Delivery {
-	msgs, err := ch.Consume(
+	newChannel, err := conn.Channel()
+	myutils.FailOnError(err, "Failed to open a new channel for consuming messages")
+
+	msgs, err := newChannel.Consume(
 		queueName,
 		"consumer", // consumer
 		true,       // auto-ack
