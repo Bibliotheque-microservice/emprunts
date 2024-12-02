@@ -42,6 +42,31 @@ func main() {
 
 		}
 	}()
+
+	go func() {
+		emprunts_msg := rabbitmq.ConsumeMessages("emprunts_finished_queue")
+
+		for msg := range emprunts_msg {
+			switch msg.RoutingKey {
+			case "emprunts.v1.finished":
+				var jsonData interface{}
+				err := json.Unmarshal(msg.Body, &jsonData)
+
+				if err != nil {
+					log.Printf("Erreur de parsing JSON : %v", err)
+					continue
+				}
+
+				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
+				log.Printf("Contenu brut du message : %s", jsonData)
+
+			default:
+				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
+				log.Printf("Contenu brut du message : %s", string(msg.Body))
+			}
+
+		}
+	}()
 	app := fiber.New()
 
 	setupRoutes(app)
