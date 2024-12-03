@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/Bibliotheque-microservice/emprunts/database"
-	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitMQ"
+	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitmq"
 	"github.com/Bibliotheque-microservice/emprunts/structures"
 	"github.com/gofiber/fiber/v2"
 )
