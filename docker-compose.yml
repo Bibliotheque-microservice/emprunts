@@ -7,7 +7,7 @@ services:
       - "5000:5000"
     volumes:
       - .:/usr/src/app
-    command: air ./cmd/main.go -b 0.0.0.0
+    command: air ./cmd/ -b 0.0.0.0
     depends_on:
       db: 
         condition: service_started
