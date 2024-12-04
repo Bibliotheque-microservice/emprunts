@@ -40,6 +40,6 @@ func ConnectDb() {
 	db.AutoMigrate(&models.Emprunt{}, &models.Penalite{})
 
 	DB = Dbinstance{
-		Db: db.Debug(),
+		Db: db,
 	}
 }
