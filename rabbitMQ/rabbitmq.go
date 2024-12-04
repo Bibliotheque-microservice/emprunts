@@ -65,6 +65,8 @@ func InitRabbitMQ() {
 
 	// Used to alert user that for a new penality
 	DeclareAndBindQueue("penality_exchange", "user_penalties_queue", "user.v1.penalities.new")
+
+	DeclareAndBindQueue("penality_exchange", "user_penalties_queue", "user.v1.penalities.updated")
 }
 
 // PublishMessage publishes a message to a specific routing key

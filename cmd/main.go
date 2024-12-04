@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/Bibliotheque-microservice/emprunts/cron"
 	"github.com/Bibliotheque-microservice/emprunts/database"
 	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitmq"
 	"github.com/Bibliotheque-microservice/emprunts/structures"
@@ -66,6 +67,10 @@ func main() {
 			}
 
 		}
+	}()
+
+	go func() {
+		cron.StartCron()
 	}()
 	app := fiber.New()
 
