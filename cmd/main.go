@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/Bibliotheque-microservice/emprunts/cron"
 	"github.com/Bibliotheque-microservice/emprunts/database"
@@ -76,5 +78,10 @@ func main() {
 
 	setupRoutes(app)
 
-	app.Listen(":5000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	app.Listen(fmt.Sprintf(":%s", port))
 }
