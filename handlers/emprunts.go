@@ -35,8 +35,8 @@ func CreateEmprunt(c *fiber.Ctx) error {
 
 	// Créer l'emprunt dans la base de données
 	emprunt := models.Emprunt{
-		UtilisateurID:   request.UserID,
-		LivreID:         request.BookID,
+		UtilisateurID:   uint(request.UserID),
+		LivreID:         uint(request.BookID),
 		DateEmprunt:     time.Now(),
 		DateRetourPrevu: time.Now().Add(14 * 24 * time.Hour), // 2 semaines de durée
 	}
@@ -65,4 +65,53 @@ func CreateEmprunt(c *fiber.Ctx) error {
 
 	// Répondre avec succès et autoriser l'emprunt
 	return c.JSON(fiber.Map{"autorisé": true, "message": "Emprunt créé avec succès"})
+}
+
+func Home(c *fiber.Ctx) error {
+	return c.SendString("Hello ma vie!")
+}
+
+func UpdateEmprunts(c *fiber.Ctx) error {
+	// Parse la requete
+	var empruntRequest structures.EmpruntReturned
+	if err := c.BodyParser(&empruntRequest); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// Si l'emprunt a été retourné, updater la date de retour
+	if empruntRequest.Returned {
+		err := database.DB.Db.Model(&models.Emprunt{}).
+			Where("id_emprunt = ?", empruntRequest.EmpruntID).
+			Update("date_retour_effectif", time.Now()).Error
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Erreur lors de la mise à jour de l'emprunt avec bdd.",
+				"error":   err.Error(),
+			})
+		}
+
+		// retrieve the whole emprunt
+		var updatedEmprunt models.Emprunt
+		err = database.DB.Db.First(&updatedEmprunt, "id_emprunt = ?", empruntRequest.EmpruntID).Error
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Erreur lors de la mise à jour de l'emprunt avec bdd.",
+				"error":   err.Error(),
+			})
+		}
+
+		rabbitmq.PublishMessage("emprunts_exchange", "emprunts.v1.finished", updatedEmprunt)
+
+		// Envoyer un message aux cosnumers pour indiquer que le livre a été retourné
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message": "Date de retour mise à jour avec succès.",
+		})
+	} else {
+		return c.Status(400).SendString("Livre not returned")
+	}
+
 }

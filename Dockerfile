@@ -1,11 +1,13 @@
-FROM golang:1.20-alpine
+FROM golang:1.23.3
 
 WORKDIR /usr/src/app
 
+RUN go install github.com/air-verse/air@latest
+
 COPY . .
 
-RUN apk add --no-cache git
+RUN go clean -modcache
 
 RUN go mod tidy
 
-CMD ["go", "run", "./cmd/main.go"]
+CMD ["air"]

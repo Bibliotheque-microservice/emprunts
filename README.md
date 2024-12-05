@@ -40,3 +40,42 @@ example de rendu
 }
 ```
 
+
+#### Etre notifié quand un emprunt est pour la première fois en retard et donc a une sanction financiète
+
+- queue : "user_penalties_queue"
+ 
+- routing key : "user.v1.penalities.new"
+
+example de rendu 
+
+```json
+{
+  "penalityId": 3,
+  "empruntId": 6,
+  "amount": 60.2,
+  "userId": 8,
+  "created_at": "2024-12-04T10:23:00.016773Z",
+  "updated_at": "2024-12-04T22:42:00.011706844Z"
+}
+```
+
+
+#### Etre notifié quand un emprunt est à nouveau en retard (un jour de plus), la santion financière est donc mis à jour
+
+- queue : "user_penalties_queue"
+ 
+- routing key : "user.v1.penalities.updated"
+
+example de rendu 
+
+```json
+{
+  "penalityId": 3,
+  "empruntId": 6,
+  "amount": 60.2,
+  "userId": 8,
+  "created_at": "2024-12-04T10:23:00.016773Z",
+  "updated_at": "2024-12-04T22:42:00.011706844Z"
+}
+```

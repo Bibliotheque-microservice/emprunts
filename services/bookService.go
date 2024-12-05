@@ -5,11 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
 // Vérifie la disponibilité du livre via le service externe
 func CheckBookAvailability(bookID int) (bool, error) {
-	url := fmt.Sprintf("http://service-livre/%d/disponibilité", bookID)
+	apiBookURL := os.Getenv("API_BOOK")
+	if apiBookURL == "" {
+		return false, fmt.Errorf("la variable d'environnement API_BOOK n'est pas définie")
+	}
+
+	// Construction de l'URL
+	url := fmt.Sprintf("http://%s/books/%d/availability", apiBookURL, bookID)
+	fmt.Printf("URL construite pour la disponibilité des livres : %s\n", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return false, err
@@ -17,11 +25,12 @@ func CheckBookAvailability(bookID int) (bool, error) {
 	defer resp.Body.Close()
 
 	var availability struct {
-		Available bool `json:"available"`
+		Available bool `json:"availability"`
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&availability); err != nil {
 		return false, err
 	}
+
 	return availability.Available, nil
 }

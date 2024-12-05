@@ -2,21 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
+	"github.com/Bibliotheque-microservice/emprunts/cron"
 	"github.com/Bibliotheque-microservice/emprunts/database"
-	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitMQ"
+	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitmq"
 	"github.com/Bibliotheque-microservice/emprunts/structures"
 	"github.com/gofiber/fiber/v2"
 )
-
-func setupRoutes(app *fiber.App) {
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Bienvenue sur l'API Emprunts !")
-	})
-
-	// Ajoutez d'autres routes ici si nécessaire
-}
 
 func main() {
 	database.ConnectDb()
@@ -68,7 +63,16 @@ func main() {
 		}
 	}()
 
+	go func() {
+		cron.StartCron()
+	}()
 	app := fiber.New()
 	setupRoutes(app)
-	log.Fatal(app.Listen(":5000"))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	app.Listen(fmt.Sprintf(":%s", port))
 }
