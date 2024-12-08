@@ -7,7 +7,7 @@ L'application de gestion d'une bibliothèque
 #### PUT emprunts : rendre un livre
 
 ```http
-  PUT /
+  PUT /v1
 
 ```
 
@@ -17,6 +17,23 @@ L'application de gestion d'une bibliothèque
     "returned" : true
 }
 ```
+
+
+#### POST emprunts : emprunter un livre
+
+```http
+  POST /v1/emprunt
+
+```
+
+```json
+{
+    "bookId" : 1,
+    "userId": 2
+}
+```
+
+
 ## MQTT Reference
 #### Etre notifié quand un livre est rendu
 
