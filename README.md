@@ -79,3 +79,21 @@ example de rendu
   "updated_at": "2024-12-04T22:42:00.011706844Z"
 }
 ```
+
+
+
+#### Etre notifié quand un nouvel emprunt est crée, le livre n'est donc plus disponible
+
+- queue : "emprunts_created_queue"
+ 
+- routing key : "emprunts.v1.created"
+
+example de rendu 
+
+```json
+  {
+    "disponible":false,
+    "idUtilisateur":2,
+    "livreId":1
+  }
+```
