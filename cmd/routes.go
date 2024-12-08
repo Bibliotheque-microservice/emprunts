@@ -6,7 +6,11 @@ import (
 )
 
 func setupRoutes(app *fiber.App) {
-	app.Get("/", handlers.Home)
+	app.Get("/v1", handlers.Home)
 
-	app.Put("/", handlers.UpdateEmprunts)
+	// Route pour mettre à jour l'emprunt
+	app.Put("/v1", handlers.UpdateEmprunts)
+
+	// Nouvelle route pour créer un emprunt
+	app.Post("/v1/emprunt", handlers.CreateEmprunt)
 }
