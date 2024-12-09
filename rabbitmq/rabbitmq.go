@@ -17,9 +17,10 @@ func InitRabbitMQ() {
 	var err error
 
 	url := fmt.Sprintf(
-		"amqp://%s:%s@rabbitmq-emprunts:5672/",
+		"amqp://%s:%s@%s:5672/",
 		os.Getenv("BROKER_USER"),
 		os.Getenv("BROKER_PASSWORD"),
+		os.Getenv("BROKER_HOST"),
 	)
 
 	// Connect channel
