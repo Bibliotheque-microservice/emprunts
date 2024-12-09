@@ -9,7 +9,7 @@ services:
       - .:/usr/src/app
     command: air ./cmd/ -b 0.0.0.0
     depends_on:
-      db: 
+      db-emprunts: 
         condition: service_started
       rabbitmq :
         condition: service_healthy
@@ -20,7 +20,7 @@ services:
     image: adminer
     container_name: adminer
     depends_on:
-      - db
+      - db-emprunts
     ports:
       - "5555:5555"
     networks:
@@ -47,14 +47,15 @@ services:
     networks:
       - app_network
 
-  db:
+  db-emprunts:
     image: postgres:alpine
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      PGPORT: ${DB_PORT}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     volumes:
       - ./migrations/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres-db:/var/lib/postgresql/data
