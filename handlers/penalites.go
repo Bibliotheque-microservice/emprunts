@@ -87,3 +87,24 @@ func CheckPenalities() ([]models.Emprunt, error) {
 
 	return late_emprunts, nil
 }
+
+func RemovePenality(penality_id int) {
+
+	err := database.DB.Db.Model(&models.Penalite{}).
+		Where("id_penalite = ?", penality_id).
+		Update("date_paiement", time.Now()).Error
+
+	if err != nil {
+		fmt.Printf("Erreur modification : %v", err)
+	} else {
+
+		var late_emprunts []models.Penalite
+		err := database.DB.Db.Model(&models.Penalite{}).
+			Where("id_penalite = ?", penality_id).Find(&late_emprunts).Error
+
+		fmt.Print(late_emprunts)
+		fmt.Printf("Successfully updated %v", err)
+
+	}
+
+}

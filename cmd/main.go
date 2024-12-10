@@ -3,17 +3,25 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/Bibliotheque-microservice/emprunts/cron"
 	"github.com/Bibliotheque-microservice/emprunts/database"
+	"github.com/Bibliotheque-microservice/emprunts/handlers"
+	middleware "github.com/Bibliotheque-microservice/emprunts/middleware"
 	rabbitmq "github.com/Bibliotheque-microservice/emprunts/rabbitmq"
 	"github.com/Bibliotheque-microservice/emprunts/structures"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	log := logrus.New()
+	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logrus.InfoLevel)
+
 	database.ConnectDb()
 
 	rabbitmq.InitRabbitMQ()
@@ -57,6 +65,7 @@ func main() {
 				}
 				log.Printf("Message JSON reçu : %+v", jsonData)
 			default:
+				log.Printf("Message reçu : %+v", msg)
 				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
 				log.Printf("Contenu brut du message : %s", string(msg.Body))
 			}
@@ -64,15 +73,36 @@ func main() {
 	}()
 
 	go func() {
+		penalities_msg := rabbitmq.ConsumeMessages("paiements_queue")
+
+		for msg := range penalities_msg {
+			var jsonData structures.Penality_paye_payload
+			err := json.Unmarshal(msg.Body, &jsonData)
+			if err != nil {
+				log.Printf("Erreur de parsing JSON : %v", err)
+				continue
+			}
+			log.Printf("Message JSON reçu paiement : %+v", jsonData)
+			handlers.RemovePenality(jsonData.PenalityID)
+		}
+	}()
+
+	go func() {
 		cron.StartCron()
 	}()
 	app := fiber.New()
+
+	app.Use(middleware.LoggerMiddleware(log))
+
 	setupRoutes(app)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
+
+	log.Info("Application démarrée")
+	log.Warn("Ceci est un message de niveau Warn")
 
 	app.Listen(fmt.Sprintf(":%s", port))
 }

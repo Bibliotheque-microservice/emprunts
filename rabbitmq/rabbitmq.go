@@ -3,15 +3,23 @@ package rabbitmq
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/Bibliotheque-microservice/emprunts/myutils"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/sirupsen/logrus"
 )
 
 var conn *amqp091.Connection
 var ch *amqp091.Channel
+
+var log = logrus.New()
+
+func init() {
+	// Configuration du logger
+	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetLevel(logrus.InfoLevel)
+}
 
 func InitRabbitMQ() {
 	var err error
@@ -86,13 +94,18 @@ func PublishMessage(exchangeName string, routingKey string, message interface{})
 			Body:        messageJSON,
 		})
 	myutils.FailOnError(err, "Failed to publish a message")
-	log.Printf("Published message to %s: %s", routingKey, message)
+	log.WithFields(logrus.Fields{
+		"body": messageJSON,
+	}).Info("Message Published")
 }
 
 // ConsumeMessages starts consuming messages from a specific queue
 func ConsumeMessages(queueName string) <-chan amqp091.Delivery {
 	newChannel, err := conn.Channel()
-	myutils.FailOnError(err, "Failed to open a new channel for consuming messages")
+	if err != nil {
+		log.Printf("Failed to open a new channel for consuming messages: %v", err)
+		return nil
+	}
 
 	msgs, err := newChannel.Consume(
 		queueName,
@@ -103,7 +116,11 @@ func ConsumeMessages(queueName string) <-chan amqp091.Delivery {
 		false,      // no-wait
 		nil,        // args
 	)
-	myutils.FailOnError(err, "Failed to register a consumer")
+	if err != nil {
+		// Enregistrez l'erreur sans provoquer un plantage.
+		log.Printf("Failed to register a consumer for queue %s: %v", queueName, err)
+		return nil
+	}
 	return msgs
 }
 

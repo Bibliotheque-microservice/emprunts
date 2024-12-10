@@ -13,4 +13,15 @@ func setupRoutes(app *fiber.App) {
 
 	// Nouvelle route pour créer un emprunt
 	app.Post("/v1/emprunt", handlers.CreateEmprunt)
+
+	// Middleware global pour gérer les 404
+	app.Use(func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   "Route not found",
+			"method":  c.Method(),
+			"path":    c.Path(),
+			"message": "Please check the API documentation.",
+		})
+	})
+
 }

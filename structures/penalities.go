@@ -15,3 +15,7 @@ type Penality_payload struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
+
+type Penality_paye_payload struct {
+	PenalityID int `json:"id_penalite"`
+}

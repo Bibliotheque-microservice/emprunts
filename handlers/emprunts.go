@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/Bibliotheque-microservice/emprunts/database"
@@ -11,25 +10,44 @@ import (
 	"github.com/Bibliotheque-microservice/emprunts/services" // Import des services pour vérifier livre et utilisateur
 	"github.com/Bibliotheque-microservice/emprunts/structures"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.New()
+
+func init() {
+	// Configuration du logger
+	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetLevel(logrus.InfoLevel)
+}
 
 // Route pour vérifier et créer un emprunt
 func CreateEmprunt(c *fiber.Ctx) error {
 	// Parse la requête JSON pour obtenir l'ID de l'utilisateur et du livre
 	var request structures.EmpruntRequest
 	if err := c.BodyParser(&request); err != nil {
+		log.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("Invalid input")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
 	// Vérifier la disponibilité du livre
 	available, err := services.CheckBookAvailability(request.BookID)
 	if err != nil || !available {
+		log.WithFields(logrus.Fields{
+			"book_id": request.BookID,
+		}).Warn("Le livre n'est pas disponible")
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Le livre n'est pas disponible"})
 	}
 
 	// Vérifier l'état de l'utilisateur (actif et pas de pénalités)
 	userAuthorized, err := services.CheckUserStatus(request.UserID)
 	if err != nil || !userAuthorized {
+
+		log.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("Erreur lors de la création de l'emprunt")
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Utilisateur non autorisé"})
 	}
 
