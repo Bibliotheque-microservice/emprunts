@@ -73,6 +73,43 @@ func main() {
 	}()
 
 	go func() {
+		emprunts_msg := rabbitmq.ConsumeMessages("emprunts_created_queue")
+
+		for msg := range emprunts_msg {
+			// Vérifie la clé de routage (RoutingKey) du message
+			switch msg.RoutingKey {
+			case "emprunts.v1.finished":
+				// Déclarer une variable pour stocker les données désérialisées
+				var messageData map[string]interface{}
+
+				// Désérialiser le corps du message JSON
+				err := json.Unmarshal(msg.Body, &messageData)
+				if err != nil {
+					log.Printf("Erreur de parsing JSON : %v", err)
+					continue
+				}
+
+				// Afficher les données reçues après la désérialisation
+				log.Printf("Message JSON reçu : %+v", messageData)
+
+			default:
+				var messageData map[string]interface{}
+
+				// Désérialiser le corps du message JSON
+				err := json.Unmarshal(msg.Body, &messageData)
+				if err != nil {
+					log.Printf("Erreur de parsing JSON : %v", err)
+					continue
+				}
+
+				// Afficher les données reçues après la désérialisation
+				log.Printf("Message JSON reçu : %+v", messageData)
+
+			}
+		}
+	}()
+
+	go func() {
 		penalities_msg := rabbitmq.ConsumeMessages("paiements_queue")
 
 		for msg := range penalities_msg {

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/Bibliotheque-microservice/emprunts/database"
@@ -42,13 +41,13 @@ func CreateEmprunt(c *fiber.Ctx) error {
 	}
 
 	// Vérifier l'état de l'utilisateur (actif et pas de pénalités)
-	userAuthorized, err := services.CheckUserStatus(request.UserID)
+	userAuthorized, msg, err := services.CheckUserStatus(request.UserID)
 	if err != nil || !userAuthorized {
 
 		log.WithFields(logrus.Fields{
 			"error": err,
-		}).Error("Erreur lors de la création de l'emprunt")
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Utilisateur non autorisé"})
+		}).Error(msg)
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": msg})
 	}
 
 	// Créer l'emprunt dans la base de données
@@ -71,15 +70,8 @@ func CreateEmprunt(c *fiber.Ctx) error {
 		"idUtilisateur": request.UserID,
 	}
 
-	// Convertir le message en JSON
-	message, err := json.Marshal(empruntMessage)
-	if err != nil {
-		log.Printf("Erreur lors de la création du message RabbitMQ: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur de publication du message"})
-	}
-
 	// Publier le message à RabbitMQ
-	rabbitmq.PublishMessage("emprunts_exchange", "emprunts.v1.created", string(message))
+	rabbitmq.PublishMessage("emprunts_exchange", "emprunts.v1.created", empruntMessage)
 
 	// Répondre avec succès et autoriser l'emprunt
 	return c.JSON(fiber.Map{"autorisé": true, "message": "Emprunt créé avec succès"})
