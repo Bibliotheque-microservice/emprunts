@@ -27,87 +27,87 @@ func main() {
 	rabbitmq.InitRabbitMQ()
 	defer rabbitmq.CloseRabbitMQ()
 
-	go func() {
-		penality_msgs := rabbitmq.ConsumeMessages("user_penalties_queue")
+	// go func() {
+	// 	penality_msgs := rabbitmq.ConsumeMessages("user_penalties_queue")
 
-		for msg := range penality_msgs {
-			switch msg.RoutingKey {
-			case "user.v1.penalities.new":
-				var jsonData structures.PenaltyMessage
-				err := json.Unmarshal(msg.Body, &jsonData)
-				if err != nil {
-					log.Printf("Erreur de parsing JSON : %v", err)
-					continue
-				}
-				log.Printf("Message JSON reçu : %+v", jsonData)
-				log.Print(jsonData.Amount)
+	// 	for msg := range penality_msgs {
+	// 		switch msg.RoutingKey {
+	// 		case "user.v1.penalities.new":
+	// 			var jsonData structures.PenaltyMessage
+	// 			err := json.Unmarshal(msg.Body, &jsonData)
+	// 			if err != nil {
+	// 				log.Printf("Erreur de parsing JSON : %v", err)
+	// 				continue
+	// 			}
+	// 			log.Printf("Message JSON reçu : %+v", jsonData)
+	// 			log.Print(jsonData.Amount)
 
-			case "user.v1.penalities.paid":
-				log.Printf("Message reçu : %s", string(msg.Body))
-			default:
-				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
-				log.Printf("Contenu brut du message : %s", string(msg.Body))
-			}
-		}
-	}()
+	// 		case "user.v1.penalities.paid":
+	// 			log.Printf("Message reçu : %s", string(msg.Body))
+	// 		default:
+	// 			log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
+	// 			log.Printf("Contenu brut du message : %s", string(msg.Body))
+	// 		}
+	// 	}
+	// }()
 
-	go func() {
-		emprunts_msg := rabbitmq.ConsumeMessages("emprunts_finished_queue")
+	// go func() {
+	// 	emprunts_msg := rabbitmq.ConsumeMessages("emprunts_finished_queue")
 
-		for msg := range emprunts_msg {
-			switch msg.RoutingKey {
-			case "emprunts.v1.finished":
-				var jsonData interface{}
-				err := json.Unmarshal(msg.Body, &jsonData)
-				if err != nil {
-					log.Printf("Erreur de parsing JSON : %v", err)
-					continue
-				}
-				log.Printf("Message JSON reçu : %+v", jsonData)
-			default:
-				log.Printf("Message reçu : %+v", msg)
-				log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
-				log.Printf("Contenu brut du message : %s", string(msg.Body))
-			}
-		}
-	}()
+	// 	for msg := range emprunts_msg {
+	// 		switch msg.RoutingKey {
+	// 		case "emprunts.v1.finished":
+	// 			var jsonData interface{}
+	// 			err := json.Unmarshal(msg.Body, &jsonData)
+	// 			if err != nil {
+	// 				log.Printf("Erreur de parsing JSON : %v", err)
+	// 				continue
+	// 			}
+	// 			log.Printf("Message JSON reçu : %+v", jsonData)
+	// 		default:
+	// 			log.Printf("Message reçu : %+v", msg)
+	// 			log.Printf("Message non géré avec Routing Key : %s", msg.RoutingKey)
+	// 			log.Printf("Contenu brut du message : %s", string(msg.Body))
+	// 		}
+	// 	}
+	// }()
 
-	go func() {
-		emprunts_msg := rabbitmq.ConsumeMessages("emprunts_created_queue")
+	// go func() {
+	// 	emprunts_msg := rabbitmq.ConsumeMessages("emprunts_created_queue")
 
-		for msg := range emprunts_msg {
-			// Vérifie la clé de routage (RoutingKey) du message
-			switch msg.RoutingKey {
-			case "emprunts.v1.finished":
-				// Déclarer une variable pour stocker les données désérialisées
-				var messageData map[string]interface{}
+	// 	for msg := range emprunts_msg {
+	// 		// Vérifie la clé de routage (RoutingKey) du message
+	// 		switch msg.RoutingKey {
+	// 		case "emprunts.v1.finished":
+	// 			// Déclarer une variable pour stocker les données désérialisées
+	// 			var messageData map[string]interface{}
 
-				// Désérialiser le corps du message JSON
-				err := json.Unmarshal(msg.Body, &messageData)
-				if err != nil {
-					log.Printf("Erreur de parsing JSON : %v", err)
-					continue
-				}
+	// 			// Désérialiser le corps du message JSON
+	// 			err := json.Unmarshal(msg.Body, &messageData)
+	// 			if err != nil {
+	// 				log.Printf("Erreur de parsing JSON : %v", err)
+	// 				continue
+	// 			}
 
-				// Afficher les données reçues après la désérialisation
-				log.Printf("Message JSON reçu : %+v", messageData)
+	// 			// Afficher les données reçues après la désérialisation
+	// 			log.Printf("Message JSON reçu : %+v", messageData)
 
-			default:
-				var messageData map[string]interface{}
+	// 		default:
+	// 			var messageData map[string]interface{}
 
-				// Désérialiser le corps du message JSON
-				err := json.Unmarshal(msg.Body, &messageData)
-				if err != nil {
-					log.Printf("Erreur de parsing JSON : %v", err)
-					continue
-				}
+	// 			// Désérialiser le corps du message JSON
+	// 			err := json.Unmarshal(msg.Body, &messageData)
+	// 			if err != nil {
+	// 				log.Printf("Erreur de parsing JSON : %v", err)
+	// 				continue
+	// 			}
 
-				// Afficher les données reçues après la désérialisation
-				log.Printf("Message JSON reçu : %+v", messageData)
+	// 			// Afficher les données reçues après la désérialisation
+	// 			log.Printf("Message JSON reçu : %+v", messageData)
 
-			}
-		}
-	}()
+	// 		}
+	// 	}
+	// }()
 
 	go func() {
 		penalities_msg := rabbitmq.ConsumeMessages("paiements_queue")
