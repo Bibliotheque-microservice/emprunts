@@ -16,7 +16,7 @@ func CheckBookAvailability(bookID int) (bool, error) {
 	}
 
 	// Construction de l'URL
-	url := fmt.Sprintf("http://%s/books/%d/availability", apiBookURL, bookID)
+	url := fmt.Sprintf("http://%s/v1/books/%d/availability", apiBookURL, bookID)
 	fmt.Printf("URL construite pour la disponibilité des livres : %s\n", url)
 	resp, err := http.Get(url)
 	if err != nil {
